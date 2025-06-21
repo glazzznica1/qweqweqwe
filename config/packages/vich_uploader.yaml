@@ -1,0 +1,13 @@
+vich_uploader:
+    db_driver: orm
+    
+    mappings:
+        employee_photo:
+            uri_prefix: /uploads/employees
+            upload_destination: '%kernel.project_dir%/public/uploads/employees'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer
+        
+        document:
+            uri_prefix: /uploads/documents
+            upload_destination: '%kernel.project_dir%/public/uploads/documents'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer

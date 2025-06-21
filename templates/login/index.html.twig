@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Вход</h1>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        <form action="{{ path('app_login') }}" method="post">
+            {{ form_start(loginFormType) }}
+                {{ form_row(loginFormType.username) }}
+                {{ form_row(loginFormType.password) }}
+
+                <input type="hidden" name="_target_path" value="/admin">  {# Перенаправляем в админку после входа #}
+
+                <button class="btn btn-primary" type="submit">Войти</button>
+            {{ form_end(loginForm) }}
+        </form>
+    </div>
+{% endblock %}
