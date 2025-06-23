@@ -1,68 +1,13 @@
 {% extends '@EasyAdmin/crud/index.html.twig' %}
 
-{% block page_title %}
-    Документы по охране труда
-    <small class="text-muted">(просроченные выделены красным)</small>
-{% endblock %}
-
-{% block content_title %}
-    {{ block('page_title') }}
-{% endblock %}
-
-{% block global_actions %}
-    {{ parent() }}
-    <a href="{{ ea_url().setAction('export').setEntity('Document') }}" class="btn btn-secondary">
-        <i class="fa fa-download"></i> Экспорт в CSV
-    </a>
-{% endblock %}
-
 {% block table_body %}
     <tbody>
     {% for entity in paginator %}
-        {% set isExpired = entity.instance and entity.instance.isExpired() %}
-        <tr {% if isExpired %}class="table-danger"{% endif %}>
+        <tr {% if entity.instance and entity.instance.isExpired() %}style="background-color: #ffdddd;"{% endif %}>
             {% for field in entity.fields %}
-                <td data-label="{{ field.label|trans(ea.i18n.translationParameters) }}">
-                    {{ field.formattedValue|raw }}
-                    {% if field.property == 'expiryDate' and isExpired %}
-                        <span class="badge bg-danger ms-2">
-                            <i class="fa fa-exclamation-circle"></i> Просрочен
-                        </span>
-                    {% endif %}
-                </td>
+                <td>{{ field.formattedValue }}</td>
             {% endfor %}
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="{{ fields|length }}" class="text-center">Документы не найдены</td>
         </tr>
     {% endfor %}
     </tbody>
-{% endblock %}
-
-{% block item_actions %}
-    {{ parent() }}
-    {% if entity.instance and entity.instance.isExpired() %}
-        <span class="badge bg-danger ms-2" title="Документ просрочен">
-            <i class="fa fa-clock"></i> {{ entity.instance.expiryDate|date('d.m.Y') }}
-        </span>
-    {% endif %}
-{% endblock %}
-
-{% block head_styles %}
-    {{ parent() }}
-    <style>
-        .table-danger td {
-            background-color: #ffebee;
-            border-left: 3px solid #f44336;
-        }
-        .badge.bg-danger {
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-    </style>
 {% endblock %}
