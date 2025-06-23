@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 
 class DocumentCrudController extends AbstractCrudController
 {
@@ -74,5 +75,9 @@ public function configureFilters(Filters $filters): Filters
             ]))
     ;
 }
+
+
+    // src/Entity/Document.php
+
 }
 

@@ -173,4 +173,10 @@ class Document
 
         return $this;
     }
+public function isExpired(): bool
+    {
+        return $this->getExpiryDate() && $this->getExpiryDate() < new \DateTime();
+    }
+
+
 }

@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Repository\NotificationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use App\Entity\Document;
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 class Notification
 {
@@ -53,12 +53,12 @@ class Notification
         return $this;
     }
 
-    public function getDocument(): ?document
+    public function getDocument(): ?Document
     {
         return $this->document;
     }
 
-    public function setDocument(?document $document): static
+    public function setDocument(?Document $document): static
     {
         $this->document = $document;
 
