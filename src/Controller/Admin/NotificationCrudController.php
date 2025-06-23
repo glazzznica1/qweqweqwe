@@ -41,7 +41,7 @@ public function configureFields(string $pageName): iterable
                 'viewed' => 'success'
             ]),
         TextField::new('document.expiryStatus', 'Статус документа')
-            ->setTemplatePath('admin/field/document_expiry_status.html.twig')
+            ->setTemplatePath('admin/field/notification_status.html.twig')
             ->onlyOnIndex()
     ];
 }
