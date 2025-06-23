@@ -5,51 +5,62 @@ namespace App\Entity;
 use App\Repository\NotificationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Document;
+
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 class Notification
 {
+    public const STATUS_NEW = 'new';
+    public const STATUS_VIEWED = 'viewed';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    #[ORM\Column(length: 20)]
+    private string $status = self::STATUS_NEW;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: Document::class, inversedBy: 'notifications')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Document $document = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
 
     public function setStatus(string $status): static
     {
-        $this->status = $status;
+        if (!in_array($status, [self::STATUS_NEW, self::STATUS_VIEWED])) {
+            throw new \InvalidArgumentException("Invalid status");
+        }
 
+        $this->status = $status;
         return $this;
     }
 
@@ -63,5 +74,15 @@ class Notification
         $this->document = $document;
 
         return $this;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->status === self::STATUS_NEW;
+    }
+
+    public function markAsViewed(): void
+    {
+        $this->status = self::STATUS_VIEWED;
     }
 }
