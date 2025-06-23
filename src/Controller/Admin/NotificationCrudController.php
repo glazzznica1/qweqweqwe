@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 
 class NotificationCrudController extends AbstractCrudController
 {
@@ -19,19 +20,19 @@ class NotificationCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
-            IdField::new('id')->onlyOnIndex(),
-            AssociationField::new('document', 'Документ')
-                ->setCrudController(DocumentCrudController::class)
-                ->formatValue(function ($value, $entity) {
-                    return $entity->getDocument() ? $entity->getDocument()->getTitle() : 'Нет документа';
-                }),
-            DateTimeField::new('createdAt', 'Дата создания')
-                ->setFormat('dd.MM.yyyy HH:mm')
-                ->hideOnForm(),
-            TextField::new('status', 'Статус')
-                ->setTemplatePath('admin/field/notification_status.html.twig')
-        ];
+          return [
+        IdField::new('id')->onlyOnIndex(),
+        AssociationField::new('document')
+            ->setCrudController(DocumentCrudController::class),
+        DateTimeField::new('createdAt')
+            ->setFormat('dd.MM.yyyy HH:mm'),
+        ChoiceField::new('status')
+            ->setChoices([
+                'New' => 'new',
+                'Viewed' => 'viewed'
+            ])
+            ->renderAsBadges()
+    ];
     }
 
     public function configureCrud(Crud $crud): Crud
