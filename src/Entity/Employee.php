@@ -26,7 +26,7 @@ class Employee
     private ?string $position = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $hireDate = null;
+    private ?\DateTimeInterface $hireDate = null;
 
     #[ORM\Column(length: 255)]
     private ?string $department = null;
@@ -34,15 +34,17 @@ class Employee
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
-    /**
-     * @var Collection<int, Document>
-     */
     #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'responsibleEmployee')]
     private Collection $documents;
 
     public function __construct()
     {
         $this->documents = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return trim($this->firstName . ' ' . $this->lastName);
     }
 
     public function getId(): ?int
@@ -74,6 +76,11 @@ class Employee
         return $this;
     }
 
+    public function getFullName(): string
+    {
+        return $this->__toString();
+    }
+
     public function getPosition(): ?string
     {
         return $this->position;
@@ -86,12 +93,12 @@ class Employee
         return $this;
     }
 
-    public function getHireDate(): ?\DateTime
+    public function getHireDate(): ?\DateTimeInterface
     {
         return $this->hireDate;
     }
 
-    public function setHireDate(\DateTime $hireDate): static
+    public function setHireDate(\DateTimeInterface $hireDate): static
     {
         $this->hireDate = $hireDate;
 
@@ -143,7 +150,6 @@ class Employee
     public function removeDocument(Document $document): static
     {
         if ($this->documents->removeElement($document)) {
-            // set the owning side to null (unless already changed)
             if ($document->getResponsibleEmployee() === $this) {
                 $document->setResponsibleEmployee(null);
             }

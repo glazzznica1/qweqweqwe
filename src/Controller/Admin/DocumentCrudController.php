@@ -5,18 +5,13 @@ namespace App\Controller\Admin;
 use App\Entity\Document;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 
 class DocumentCrudController extends AbstractCrudController
 {
@@ -25,59 +20,45 @@ class DocumentCrudController extends AbstractCrudController
         return Document::class;
     }
 
-    /*
-    public function configureFields(string $pageName): iterable
+  public function configureFields(string $pageName): iterable
+{
+    return [
+        IdField::new('id', 'ID')->onlyOnIndex(),
+        TextField::new('title', 'Название'),
+        TextField::new('type', 'Тип'),
+        DateField::new('createdAt', 'Дата создания')
+            ->setFormat('dd.MM.yyyy'),
+        DateField::new('expiryDate', 'Срок действия')
+            ->setFormat('dd.MM.yyyy'),
+        AssociationField::new('responsibleEmployee', 'Ответственный')
+            ->setCrudController(EmployeeCrudController::class)
+            ->formatValue(function ($value, $entity) {
+                return $entity->getResponsibleEmployee()->__toString();
+            }),
+    ];
+}
+
+    public function configureCrud(Crud $crud): Crud
     {
-        return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
-        ];
+        return $crud
+            ->setPageTitle('index', 'Документы')
+            ->setEntityLabelInSingular('Документ')
+            ->setEntityLabelInPlural('Документы')
+            ->setDefaultSort(['createdAt' => 'DESC'])
+            ->setSearchFields(['title', 'type'])
+            ->overrideTemplate('crud/index', 'admin/document/list.html.twig');
     }
-    */
 
-
-public function configureFields(string $pageName): iterable
-{
-    yield TextField::new('title');
-    yield ChoiceField::new('type')
-        ->setChoices([
-            'Instruction' => 'instruction',
-            'Order' => 'order',
-            'Certificate' => 'certificate',
-            // Add more types as needed
-        ]);
-    yield DateField::new('createdAt');
-    yield DateField::new('expiryDate');
-    yield TextField::new('filePath');
-    yield AssociationField::new('responsibleEmployee');
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add(TextFilter::new('title'))
+            ->add(ChoiceFilter::new('type')
+                ->setChoices([
+                    'Инструкция' => 'instruction',
+                    'Приказ' => 'order',
+                    'Сертификат' => 'certificate',
+                ]))
+            ->add('responsibleEmployee');
+    }
 }
-public function configureCrud(Crud $crud): Crud
-{
-    return $crud
-        ->setEntityLabelInSingular('Document')
-        ->setEntityLabelInPlural('Documents')
-        ->setDefaultSort(['createdAt' => 'DESC'])
-        ->overrideTemplate('crud/index', 'admin/document/list.html.twig'); //  шаблон
-}
-
-
-
-public function configureFilters(Filters $filters): Filters
-{
-    return $filters
-        ->add(TextFilter::new('title'))
-        ->add(ChoiceFilter::new('type')
-            ->setChoices([
-                'Instruction' => 'instruction',
-                'Order' => 'order',
-                'Certificate' => 'certificate',
-            ]))
-    ;
-}
-
-
-    // src/Entity/Document.php
-
-}
-

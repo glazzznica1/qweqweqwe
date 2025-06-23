@@ -2,11 +2,25 @@
 
 {% block table_body %}
     <tbody>
-    {% for entity in paginator %}
-        <tr {% if entity.instance and entity.instance.isExpired() %}style="background-color: #ffdddd;"{% endif %}>
-            {% for field in entity.fields %}
-                <td>{{ field.formattedValue }}</td>
-            {% endfor %}
+    {% for document in paginator %}
+        {% if document.instance %}
+            <tr {% if document.instance.isExpired() %}class="table-danger"{% endif %}>
+                <td>{{ document.instance.id }}</td>
+                <td>{{ document.instance.title }}</td>
+                <td>{{ document.instance.type }}</td>
+                <td>{{ document.instance.createdAt|date('d.m.Y') }}</td>
+                <td>
+                    {{ document.instance.expiryDate ? document.instance.expiryDate|date('d.m.Y') : 'Бессрочный' }}
+                    {% if document.instance.isExpired() %}
+                        <span class="text-danger">(Просрочен)</span>
+                    {% endif %}
+                </td>
+                <td>{{ document.instance.responsibleEmployee }}</td>
+            </tr>
+        {% endif %}
+    {% else %}
+        <tr>
+            <td colspan="6" class="text-center">Нет документов для отображения</td>
         </tr>
     {% endfor %}
     </tbody>
