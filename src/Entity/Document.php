@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 #[Vich\Uploadable]
@@ -55,9 +57,13 @@ class Document
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\OneToMany(mappedBy: 'document', targetEntity: Notification::class)]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
+        $this->notifications = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,8 +141,6 @@ class Document
         $this->documentFile = $documentFile;
 
         if (null !== $documentFile) {
-            // It is required that at least one field changes if you are using doctrine
-            // otherwise the event listeners won't be called and the file is lost
             $this->updatedAt = new \DateTime();
         }
 
@@ -155,29 +159,49 @@ class Document
         return $this;
     }
 
-     /**
-     * @return \DateTimeInterface|null
-     */
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    /**
-     * @param \DateTimeInterface|null $updatedAt
-     * @return Document
-     */
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
-public function isExpired(): bool
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
     {
-        return $this->getExpiryDate() && $this->getExpiryDate() < new \DateTime();
-        
+        return $this->notifications;
     }
 
+    public function addNotification(Notification $notification): self
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setDocument($this);
+        }
 
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): self
+    {
+        if ($this->notifications->removeElement($notification)) {
+            if ($notification->getDocument() === $this) {
+                $notification->setDocument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->getExpiryDate() && $this->getExpiryDate() < new \DateTime();
+    }
 }
