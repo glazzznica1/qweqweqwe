@@ -7,14 +7,17 @@
                     {{ notification.status == 'new' ? 'НОВОЕ' : 'ПРОСМОТРЕНО' }}
                 </span>
             </span>
+            
             <a href="{{ ea_url()
                 .setController('App\\Controller\\Admin\\NotificationCrudController')
                 .setAction('detail')
                 .setEntityId(notification.id) }}">
                 <i class="fa fa-eye"></i>
             </a>
+        
         </li>
     {% else %}
         <li class="list-group-item">Нет уведомлений</li>
     {% endfor %}
+    
 </ul>

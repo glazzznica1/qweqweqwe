@@ -18,12 +18,17 @@ class NotificationCrudController extends AbstractCrudController
         return Notification::class;
     }
 
-    public function configureFields(string $pageName): iterable
-    {
-          return [
+public function configureFields(string $pageName): iterable
+{
+    return [
         IdField::new('id')->onlyOnIndex(),
         AssociationField::new('document')
-            ->setCrudController(DocumentCrudController::class),
+            ->setCrudController(DocumentCrudController::class)
+            ->formatValue(function ($value, $notification) {
+                $doc = $notification->getDocument();
+                $title = $doc->getTitle();
+                return $doc->isExpired() ? $title.' ⚠️' : $title;
+            }),
         DateTimeField::new('createdAt')
             ->setFormat('dd.MM.yyyy HH:mm'),
         ChoiceField::new('status')
@@ -31,9 +36,15 @@ class NotificationCrudController extends AbstractCrudController
                 'New' => 'new',
                 'Viewed' => 'viewed'
             ])
-            ->renderAsBadges()
+            ->renderAsBadges([
+                'new' => 'danger',
+                'viewed' => 'success'
+            ]),
+        TextField::new('document.expiryStatus', 'Статус документа')
+            ->setTemplatePath('admin/field/document_expiry_status.html.twig')
+            ->onlyOnIndex()
     ];
-    }
+}
 
     public function configureCrud(Crud $crud): Crud
     {
