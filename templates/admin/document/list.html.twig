@@ -1,17 +1,26 @@
+{# templates/admin/document/list.html.twig #}
 {% extends '@EasyAdmin/crud/index.html.twig' %}
 
 {% block table_body %}
     <tbody>
     {% for entity in paginator %}
-        {% if entity.isExpired() %}
-            <tr style="background-color: #ffdddd;" data-ea-content-link="true">
-        {% else %}
-            <tr data-ea-content-link="true">
-        {% endif %}
+        {# entity.instance дает доступ к вашей сущности Document #}
+        <tr {% if entity.instance.isExpired() %}class="table-danger"{% endif %}>
             {% for field in entity.fields %}
-                <td data-label="{{ field.label|trans }}">{{ field.formattedValue }}</td>
+                <td data-label="{{ field.label }}">
+                    {{ field.formattedValue }}
+                </td>
             {% endfor %}
         </tr>
     {% endfor %}
     </tbody>
+{% endblock %}
+
+{% block item_actions %}
+    {{ parent() }}
+    {% if entity.instance.isExpired() %}
+        <span class="badge bg-danger ms-2" title="Документ просрочен">
+            <i class="fa fa-exclamation-triangle"></i>
+        </span>
+    {% endif %}
 {% endblock %}

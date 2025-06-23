@@ -24,26 +24,69 @@ class CheckExpiredDocumentsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $documents = $this->entityManager
+        $today = new \DateTime();
+        $output->writeln(sprintf('[%s] Начало проверки просроченных документов', $today->format('Y-m-d H:i:s')));
+
+        $expiredDocuments = $this->entityManager
             ->getRepository(Document::class)
             ->createQueryBuilder('d')
-            ->where('d.expiryDate < :now')
-            ->setParameter('now', new \DateTime())
+            ->where('d.expiryDate < :now AND d.expiryDate IS NOT NULL')
+            ->setParameter('now', $today)
             ->getQuery()
             ->getResult();
 
-        foreach ($documents as $document) {
+        if (empty($expiredDocuments)) {
+            $output->writeln('Просроченных документов не найдено');
+            return Command::SUCCESS;
+        }
+
+        $notificationCount = 0;
+
+        foreach ($expiredDocuments as $document) {
+            // Проверяем существующие уведомления за последние 7 дней
+            $existingNotification = $this->entityManager
+                ->getRepository(Notification::class)
+                ->createQueryBuilder('n')
+                ->where('n.document = :document')
+                ->andWhere('n.createdAt >= :date')
+                ->setParameter('document', $document)
+                ->setParameter('date', new \DateTime('-7 days'))
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existingNotification) {
+                $output->writeln(sprintf(
+                    'Уведомление для документа "%s" уже существует (создано %s)',
+                    $document->getTitle(),
+                    $existingNotification->getCreatedAt()->format('Y-m-d')
+                ));
+                continue;
+            }
+
             $notification = new Notification();
             $notification->setDocument($document);
-            $notification->setCreatedAt(new \DateTime());
+            $notification->setCreatedAt($today);
             $notification->setStatus('new');
 
             $this->entityManager->persist($notification);
-            $output->writeln("Создано уведомление для документа: " . $document->getTitle());
+            $notificationCount++;
+
+            $output->writeln(sprintf(
+                'Создано уведомление для документа: "%s" (просрочен %s)',
+                $document->getTitle(),
+                $document->getExpiryDate()->format('Y-m-d')
+            ));
         }
 
         $this->entityManager->flush();
-        $output->writeln(sprintf('Создано уведомлений: %d', count($documents)));
+        
+        $output->writeln([
+            '=================================',
+            sprintf('Всего обработано документов: %d', count($expiredDocuments)),
+            sprintf('Создано новых уведомлений: %d', $notificationCount),
+            sprintf('Время выполнения: %d сек.', time() - $today->getTimestamp()),
+        ]);
 
         return Command::SUCCESS;
     }

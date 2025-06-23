@@ -22,7 +22,7 @@ class Notification
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?document $document = null;
+    private ?Document $document = null;
 
     public function getId(): ?int
     {

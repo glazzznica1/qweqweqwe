@@ -47,7 +47,7 @@ class Document
         mimeTypesMessage: 'Пожалуйста, загрузите файл PDF или DOCX.',
     )]
     private ?File $documentFile = null;
-
+        
     #[ORM\ManyToOne(targetEntity: Employee::class, inversedBy: 'documents')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Employee $responsibleEmployee = null;
@@ -176,6 +176,7 @@ class Document
 public function isExpired(): bool
     {
         return $this->getExpiryDate() && $this->getExpiryDate() < new \DateTime();
+        
     }
 
 

@@ -58,7 +58,7 @@ public function configureCrud(Crud $crud): Crud
         ->setEntityLabelInSingular('Document')
         ->setEntityLabelInPlural('Documents')
         ->setDefaultSort(['createdAt' => 'DESC'])
-        ->overrideTemplate('crud/index', 'admin/Document/list.html.twig'); //  шаблон
+        ->overrideTemplate('crud/index', 'admin/document/list.html.twig'); //  шаблон
 }
 
 
