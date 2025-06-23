@@ -12,6 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 
 class DocumentCrudController extends AbstractCrudController
 {
@@ -20,7 +21,7 @@ class DocumentCrudController extends AbstractCrudController
         return Document::class;
     }
 
-  public function configureFields(string $pageName): iterable
+public function configureFields(string $pageName): iterable
 {
     return [
         IdField::new('id', 'ID')->onlyOnIndex(),
@@ -29,25 +30,29 @@ class DocumentCrudController extends AbstractCrudController
         DateField::new('createdAt', 'Дата создания')
             ->setFormat('dd.MM.yyyy'),
         DateField::new('expiryDate', 'Срок действия')
-            ->setFormat('dd.MM.yyyy'),
+            ->setFormat('dd.MM.yyyy')
+            ->setHelp('Оставьте пустым для бессрочных документов'),
         AssociationField::new('responsibleEmployee', 'Ответственный')
             ->setCrudController(EmployeeCrudController::class)
             ->formatValue(function ($value, $entity) {
                 return $entity->getResponsibleEmployee()->__toString();
             }),
     ];
+     if ($pageName === Crud::PAGE_DETAIL) {
+        $fields[] = CollectionField::new('notifications', 'Уведомления')
+            ->useEntryCrudForm(NotificationCrudController::class);
+    }
+
+    return $fields;
 }
 
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud
-            ->setPageTitle('index', 'Документы')
-            ->setEntityLabelInSingular('Документ')
-            ->setEntityLabelInPlural('Документы')
-            ->setDefaultSort(['createdAt' => 'DESC'])
-            ->setSearchFields(['title', 'type'])
-            ->overrideTemplate('crud/index', 'admin/document/list.html.twig');
-    }
+public function configureCrud(Crud $crud): Crud
+{
+    return $crud
+        ->setPageTitle('index', 'Документы')
+        ->setDefaultSort(['createdAt' => 'DESC'])
+        ->setPaginatorPageSize(20);
+}
 
     public function configureFilters(Filters $filters): Filters
     {
